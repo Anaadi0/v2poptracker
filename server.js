@@ -71,25 +71,32 @@ app.post("/log", (req, res) => {
 app.get("/logs", (req, res) => {
   const db = loadDB();
 
-  let html = "<h2>📊 Devices</h2><pre>";
+  let html = "<h2>📊 Device Logs</h2><pre>";
 
   Object.entries(db.devices).forEach(([id, d], i) => {
-    html += `
-[${i + 1}]
-Device ID: ${id}
-First Seen: ${d.first_seen}
-Last Seen: ${d.last_seen}
-Visits: ${d.visits}
-IP: ${d.ip}
-Fingerprint: ${d.fingerprint}
-OS: ${d.os}
-Browser: ${d.browser}
--------------------------
-`;
+
+    html += `\n[${i + 1}]\n`;
+
+    html += JSON.stringify(
+      {
+        first_seen: d.first_seen,
+        last_seen: d.last_seen,
+        ip: d.ip,
+        fingerprint: d.fingerprint,
+        browser: d.browser,
+        os: d.os,
+        screen: d.screen,
+        timezone: d.timezone,
+        visits: d.visits
+      },
+      null,
+      2
+    );
+
+    html += "\n-------------------------\n";
   });
 
   html += "</pre>";
-
   res.send(html);
 });
 
