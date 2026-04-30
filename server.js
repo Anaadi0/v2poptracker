@@ -9,80 +9,84 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-/* =========================
-   SIMPLE JSON DATABASE
-========================= */
-
 const DB_FILE = path.join(__dirname, "db.json");
 
-// load DB
 function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({ logs: [] }, null, 2));
+    fs.writeFileSync(DB_FILE, JSON.stringify({ devices: {} }, null, 2));
   }
   return JSON.parse(fs.readFileSync(DB_FILE));
 }
 
-// save DB
-function saveDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+function saveDB(db) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 }
-
-/* =========================
-   LOG REQUEST
-========================= */
 
 app.post("/log", (req, res) => {
   const ip =
     req.headers["x-forwarded-for"] ||
     req.socket.remoteAddress;
 
-  const entry = {
-    time: new Date().toISOString(),
-    ip,
-    fingerprint: req.body.fingerprint,
-    browser: req.body.browser,
-    os: req.body.os,
-    screen: req.body.screen,
-    timezone: req.body.timezone
-  };
-
-  console.log("\n🔐 NEW VISITOR");
-  console.log(entry);
-  console.log("--------------------");
+  const {
+    device_id,
+    fingerprint,
+    browser,
+    os,
+    screen,
+    timezone
+  } = req.body;
 
   const db = loadDB();
-  db.logs.push(entry);
+
+  // ⭐ IMPORTANT: USE DEVICE ID AS PRIMARY KEY
+  if (!db.devices[device_id]) {
+    db.devices[device_id] = {
+      first_seen: new Date().toISOString(),
+      last_seen: null,
+      ip,
+      fingerprint,
+      browser,
+      os,
+      screen,
+      timezone,
+      visits: 0
+    };
+  }
+
+  db.devices[device_id].last_seen = new Date().toISOString();
+  db.devices[device_id].visits += 1;
+
+  console.log("\n🔐 DEVICE VISIT");
+  console.log(db.devices[device_id]);
+
   saveDB(db);
 
-  res.json({ status: "saved" });
+  res.json({ status: "ok" });
 });
 
 /* =========================
-   VIEW LOGS PAGE
+   VIEW CLEAN LOGS
 ========================= */
 
 app.get("/logs", (req, res) => {
   const db = loadDB();
 
-  let html = "<h2>📊 Logs</h2><pre>";
+  let html = "<h2>📊 Devices</h2><pre>";
 
-  db.logs
-    .slice()
-    .reverse()
-    .forEach((r, i) => {
-      html += `
+  Object.entries(db.devices).forEach(([id, d], i) => {
+    html += `
 [${i + 1}]
-Time: ${r.time}
-IP: ${r.ip}
-Fingerprint: ${r.fingerprint}
-Browser: ${r.browser}
-OS: ${r.os}
-Screen: ${r.screen}
-Timezone: ${r.timezone}
+Device ID: ${id}
+First Seen: ${d.first_seen}
+Last Seen: ${d.last_seen}
+Visits: ${d.visits}
+IP: ${d.ip}
+Fingerprint: ${d.fingerprint}
+OS: ${d.os}
+Browser: ${d.browser}
 -------------------------
 `;
-    });
+  });
 
   html += "</pre>";
 
@@ -90,7 +94,7 @@ Timezone: ${r.timezone}
 });
 
 /* =========================
-   START SERVER (RENDER SAFE)
+   START SERVER
 ========================= */
 
 const PORT = process.env.PORT || 3000;

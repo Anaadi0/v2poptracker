@@ -1,31 +1,15 @@
 {
-  "logs": [
-    {
-      "time": "2026-04-30T15:03:52.566Z",
-      "ip": "::1",
-      "fingerprint": 1152679234,
-      "browser": "Chrome",
-      "os": "Android",
-      "screen": "Current Resolution: 409x812, Available Resolution: 409x812, Color Depth: 24, Device XDPI: undefined, Device YDPI: undefined",
-      "timezone": "Asia/Calcutta"
-    },
-    {
-      "time": "2026-04-30T15:06:28.018Z",
-      "ip": "::1",
-      "fingerprint": 1231325969,
-      "browser": "Chrome",
-      "os": "Android",
-      "screen": "Current Resolution: 415x824, Available Resolution: 415x824, Color Depth: 24, Device XDPI: undefined, Device YDPI: undefined",
-      "timezone": "Asia/Calcutta"
-    },
-    {
-      "time": "2026-04-30T15:07:50.987Z",
-      "ip": "::1",
-      "fingerprint": 3537015559,
-      "browser": "Chrome",
-      "os": "Android",
-      "screen": "Current Resolution: 415x824, Available Resolution: 415x824, Color Depth: 24, Device XDPI: undefined, Device YDPI: undefined",
-      "timezone": "Asia/Calcutta"
+  "devices": {
+    "uuid-here": {
+      "first_seen": "...",
+      "last_seen": "...",
+      "ip": "...",
+      "fingerprint": "...",
+      "browser": "...",
+      "os": "...",
+      "screen": "...",
+      "timezone": "...",
+      "visits": 3
     }
-  ]
+  }
 }
