@@ -9,6 +9,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
+/* =========================
+   DATABASE FILE
+========================= */
+
 const DB_FILE = path.join(__dirname, "db.json");
 
 function loadDB() {
@@ -21,6 +25,10 @@ function loadDB() {
 function saveDB(db) {
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 }
+
+/* =========================
+   LOG DEVICE DATA
+========================= */
 
 app.post("/log", (req, res) => {
   const ip =
@@ -38,26 +46,26 @@ app.post("/log", (req, res) => {
 
   const db = loadDB();
 
-  // ⭐ IMPORTANT: USE DEVICE ID AS PRIMARY KEY
   if (!db.devices[device_id]) {
     db.devices[device_id] = {
       first_seen: new Date().toISOString(),
-      last_seen: null,
+      last_seen: new Date().toISOString(),
       ip,
       fingerprint,
       browser,
       os,
       screen,
       timezone,
-      visits: 0
+      visits: 1
     };
+  } else {
+    db.devices[device_id].last_seen = new Date().toISOString();
+    db.devices[device_id].visits += 1;
   }
 
-  db.devices[device_id].last_seen = new Date().toISOString();
-  db.devices[device_id].visits += 1;
-
-  console.log("\n🔐 DEVICE VISIT");
+  console.log("\n🔐 DEVICE LOG");
   console.log(db.devices[device_id]);
+  console.log("--------------------");
 
   saveDB(db);
 
@@ -65,7 +73,7 @@ app.post("/log", (req, res) => {
 });
 
 /* =========================
-   VIEW CLEAN LOGS
+   VIEW LOGS
 ========================= */
 
 app.get("/logs", (req, res) => {
@@ -74,26 +82,21 @@ app.get("/logs", (req, res) => {
   let html = "<h2>📊 Device Logs</h2><pre>";
 
   Object.entries(db.devices).forEach(([id, d], i) => {
-
-    html += `\n[${i + 1}]\n`;
-
-    html += JSON.stringify(
-      {
-        first_seen: d.first_seen,
-        last_seen: d.last_seen,
-        ip: d.ip,
-        fingerprint: d.fingerprint,
-        browser: d.browser,
-        os: d.os,
-        screen: d.screen,
-        timezone: d.timezone,
-        visits: d.visits
-      },
-      null,
-      2
-    );
-
-    html += "\n-------------------------\n";
+    html += `
+[${i + 1}]
+{
+  first_seen: '${d.first_seen}',
+  last_seen: '${d.last_seen}',
+  ip: '${d.ip}',
+  fingerprint: ${d.fingerprint},
+  browser: '${d.browser}',
+  os: '${d.os}',
+  screen: '${d.screen}',
+  timezone: '${d.timezone}',
+  visits: ${d.visits}
+}
+-------------------------
+`;
   });
 
   html += "</pre>";

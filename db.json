@@ -1,8 +1,8 @@
 {
   "devices": {
     "4fba2495-ce50-4fb0-92d9-61f06c3d395a": {
-      "first_seen": "2026-04-30T15:28:50.177Z",
-      "last_seen": "2026-04-30T15:31:23.448Z",
+      "first_seen": "2026-04-30T15:58:00.192Z",
+      "last_seen": "2026-04-30T15:58:14.471Z",
       "ip": "::1",
       "fingerprint": 4017986817,
       "browser": "Chrome",
@@ -10,17 +10,6 @@
       "screen": "Current Resolution: 412x915, Available Resolution: 412x915, Color Depth: 24, Device XDPI: undefined, Device YDPI: undefined",
       "timezone": "Asia/Calcutta",
       "visits": 2
-    },
-    "bab89613-4457-4598-8d33-4e4864bfe45b": {
-      "first_seen": "2026-04-30T15:34:44.205Z",
-      "last_seen": "2026-04-30T15:34:44.205Z",
-      "ip": "::1",
-      "fingerprint": 3150167763,
-      "browser": "Chrome",
-      "os": "Android",
-      "screen": "Current Resolution: 409x812, Available Resolution: 409x812, Color Depth: 24, Device XDPI: undefined, Device YDPI: undefined",
-      "timezone": "Asia/Calcutta",
-      "visits": 1
     }
   }
 }
