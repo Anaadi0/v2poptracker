@@ -9,55 +9,92 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-const LOG_FILE = path.join(__dirname, "logs.txt");
+/* =========================
+   SIMPLE JSON DATABASE
+========================= */
 
-// save logs to file
-function saveLog(data) {
-  const text = `
-==================== LOG ====================
-Time: ${data.time}
-IP: ${data.ip}
-Fingerprint: ${data.fingerprint}
-Browser: ${data.browser}
-OS: ${data.os}
-Screen: ${data.screen}
-Timezone: ${data.timezone}
-============================================
-`;
+const DB_FILE = path.join(__dirname, "db.json");
 
-  fs.appendFileSync(LOG_FILE, text + "\n");
+// load DB
+function loadDB() {
+  if (!fs.existsSync(DB_FILE)) {
+    fs.writeFileSync(DB_FILE, JSON.stringify({ logs: [] }, null, 2));
+  }
+  return JSON.parse(fs.readFileSync(DB_FILE));
 }
 
-app.post("/log", (req, res) => {
+// save DB
+function saveDB(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
 
+/* =========================
+   LOG REQUEST
+========================= */
+
+app.post("/log", (req, res) => {
   const ip =
     req.headers["x-forwarded-for"] ||
     req.socket.remoteAddress;
 
   const entry = {
+    time: new Date().toISOString(),
     ip,
     fingerprint: req.body.fingerprint,
     browser: req.body.browser,
     os: req.body.os,
     screen: req.body.screen,
-    timezone: req.body.timezone,
-    time: new Date().toISOString()
+    timezone: req.body.timezone
   };
 
-  console.log("\n🔐 NEW VISITOR DETECTED");
+  console.log("\n🔐 NEW VISITOR");
   console.log(entry);
-  console.log("---------------------------");
+  console.log("--------------------");
 
-  try {
-    saveLog(entry);
-    console.log("💾 Saved to logs.txt");
-  } catch (err) {
-    console.log("❌ File error:", err.message);
-  }
+  const db = loadDB();
+  db.logs.push(entry);
+  saveDB(db);
 
-  res.json({ status: "success" });
+  res.json({ status: "saved" });
 });
 
-app.listen(3000, () => {
-  console.log("🚀 Server running at http://localhost:3000");
+/* =========================
+   VIEW LOGS PAGE
+========================= */
+
+app.get("/logs", (req, res) => {
+  const db = loadDB();
+
+  let html = "<h2>📊 Logs</h2><pre>";
+
+  db.logs
+    .slice()
+    .reverse()
+    .forEach((r, i) => {
+      html += `
+[${i + 1}]
+Time: ${r.time}
+IP: ${r.ip}
+Fingerprint: ${r.fingerprint}
+Browser: ${r.browser}
+OS: ${r.os}
+Screen: ${r.screen}
+Timezone: ${r.timezone}
+-------------------------
+`;
+    });
+
+  html += "</pre>";
+
+  res.send(html);
+});
+
+/* =========================
+   START SERVER (RENDER SAFE)
+========================= */
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("🚀 Server running on port " + PORT);
 });

