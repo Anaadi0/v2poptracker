@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Fingerprint Lab</title>
+
+  <!-- ClientJS CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.2.1/client.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #0b0f19;
+      color: white;
+      font-family: Arial;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: #aaa;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h1>🔐 VERIFYING...</h1>
+  <div class="status" id="status">Initializing...</div>
+</div>
+
+<script>
+function setStatus(msg) {
+  document.getElementById("status").innerText = msg;
+}
+
+async function start() {
+  try {
+    setStatus("Loading ClientJS...");
+
+    const client = new ClientJS();
+
+    setStatus("Collecting fingerprint...");
+
+    const fingerprint = client.getFingerprint();
+
+    const payload = {
+      fingerprint,
+      browser: client.getBrowser(),
+      os: client.getOS(),
+      screen: client.getScreenPrint(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+
+    setStatus("Sending data...");
+
+    const res = await fetch("/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    await res.json();
+
+    // ✅ SUCCESS + REDIRECT COUNTDOWN
+    setStatus("Verification complete ✔");
+
+    let count = 3;
+
+    const timer = setInterval(() => {
+      setStatus("Redirecting... " + count);
+      count--;
+
+      if (count === 0) {
+        clearInterval(timer);
+        window.location.href =
+          "https://in.pinterest.com/pin/ice-cream--731694270723921320/";
+      }
+    }, 1000);
+
+  } catch (err) {
+    setStatus("ERROR: " + err.message);
+  }
+}
+
+window.onload = start;
+</script>
+
+</body>
+</html>
